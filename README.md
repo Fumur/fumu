@@ -1,4 +1,4 @@
-# Furini: Run AI Chat on Messenger Account
+# name: Run AI Chat on Messenger Account
 
 on:
   schedule:
