@@ -2,7 +2,7 @@ name: Run AI Chat on Messenger Account
 
 on:
   schedule:
-    - cron: "0 0,4,8,12,16,20 * * *"  # Run every 4 hours
+    - cron: "0 */4 * * *"  # Run every 4 hours, you can modify
   workflow_dispatch:
     inputs:
       username:
@@ -46,10 +46,10 @@ jobs:
   run-aichat:
     runs-on: windows-latest
     env:
-      SCPDIR: ${{ github.workspace }}\scoped_dir
-      COOKIESFILE: ${{ github.workspace }}\cookies.json
-      FBINFOSFILE: ${{ github.workspace }}\facebook_infos.bin
-      SELF_FBINFOFILE: ${{ github.workspace }}\self_facebook_info.bin
+      SCPDIR: ${{ github.workspace }}/scoped_dir
+      COOKIESFILE: ${{ github.workspace }}/cookies.json
+      FBINFOSFILE: ${{ github.workspace }}/facebook_infos.bin
+      SELF_FBINFOFILE: ${{ github.workspace }}/self_facebook_info.bin
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Pass GitHub Token
       GITHUB_REPO: ${{ github.repository }}     # Pass the repository (owner/repo)
       STORAGE_BRANCE: caches/schedule
@@ -57,10 +57,10 @@ jobs:
 
     steps:
       # Checkout the repository
-      - name: Checkout HuskyDG Automatic FB
+      - name: Checkout Gemini FBChat
         uses: actions/checkout@v3
         with:
-          repository: HuskyDG/automatic_fb
+          repository: vincentng295/gemini_fbchat
           ref: main # Optional: main or tags name
 
       # Set up Python
@@ -102,6 +102,16 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
           PASSWORD: ${{ secrets.PASSWORD }} # Decrypt key
+
+      - name: Cache scoped_dir
+        if: ${{ github.event_name == 'schedule' || inputs.check_only != true }}
+        id: cache-scoped-dir
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.SCPDIR }}
+          key: |
+            scoped-dir-${{ runner.os }}-${{ hashFiles('logininfo.json') }}
+            scoped-dir-${{ runner.os }}-
 
       # Run AI Chat on Messenger account (schedule)
       - name: Run AI Chat on Messenger account
